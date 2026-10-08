@@ -3,7 +3,7 @@ import nltk
 import os
 
 NLTK_DATA="/tmp/nltk_data"
-os.makedirs(NLTK_DATA,exit_ok=True)
+os.makedirs(NLTK_DATA,exist_ok=True)
 nltk.data.path.insert(0,NLTK_DATA)
 
 from nltk.tokenize import word_tokenize
