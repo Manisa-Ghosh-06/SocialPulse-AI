@@ -1,5 +1,10 @@
 import re
 import nltk
+import os
+
+NLTK_DATA="/tmp/nltk_data"
+os.makedirs(NLTK_DATA,exit_ok=True)
+nltk.data.path.insert(0,NLTK_DATA)
 
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
@@ -22,7 +27,7 @@ def setup_nltk():
             nltk.data.find(path)
 
         except LookupError:
-            nltk.download(resource, quiet=True)
+            nltk.download(resource, download_dir=NLTK_DATA,quiet=True)
 
 
 setup_nltk()
