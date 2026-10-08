@@ -150,29 +150,25 @@ SocialPulse-AI/
 ```bash
 git clone https://github.com/Manisa-Ghosh-06/SocialPulse-AI.git
 ```
-
 ### 2. Open the project folder
+```bash
 cd SocialPulse-AI
 ```
-
-```
 ### 3.Install the required dependencies
+```bash
 pip install -r requirements.txt
 ```
-
-```
 ### 4. Run the FastAPI application
+```bash
 uvicorn main:app --reload
 ```
-
-```
 ### 5. Open the application
+```bash
 Open the URL provided by FastAPI in your web browser.
 ```
 
-```
 ## 📓 Machine Learning Notebooks
-
+```bash
 The project includes separate notebooks for the machine learning workflow:
 
 1) Data Preprocessing – cleaning and preparing the dataset
@@ -180,10 +176,8 @@ The project includes separate notebooks for the machine learning workflow:
 3) Model Training – training the sentiment classification model
 4) Model Validation – evaluating and validating the trained model
 ```
-
-```
 ## 🎯 Objective
-
+```bash
 The objective of SocialPulse AI is to transform raw social media data into meaningful insights about:
 
        i) Public sentiment
