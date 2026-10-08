@@ -10077,36 +10077,24 @@ if(
 ========================================================= */
 
 window.addEventListener(
-    'load',
+    'DOMContentLoaded', 
     () => {
 
+        const loader = $('sp-loader');
+        if(!loader){
+            return;
+        }
+
+        loader.classList.add('sp-loader-hide');
+
+       
         setTimeout(
             () => {
-
-                const loader =
-                    $('sp-loader');
-
-                if(!loader){
-                    return;
+                if(loader){
+                    loader.remove();
                 }
-
-                loader.classList.add(
-                    'sp-loader-hide'
-                );
-
-                setTimeout(
-                    () => {
-
-                        if(loader){
-                            loader.remove();
-                        }
-
-                    },
-                    900
-                );
-
             },
-            250 
+            800 
         );
 
     }
