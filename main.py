@@ -3,7 +3,8 @@ from fastapi import (
     UploadFile,
     File,
     HTTPException,
-    Form
+    Form,
+    Header
 )
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -73,7 +74,9 @@ except Exception as e:
     MODEL_LOADED = False
     print("✗ Model loading failed:", e)
 
-reports = []
+
+# REPLACED GLOBAL LIST WITH A DICTIONARY TO STORE SESSIONS
+user_reports = {}
 
 ALLOWED_FIELDS = {
     "TEXT": "Post Text",
@@ -252,51 +255,42 @@ def validate_mapping(
 @app.post("/api/analyze")
 async def analyze(
     file: UploadFile = File(...),
-    mapping_json: str = Form(...)
+    mapping_json: str = Form(...),
+    session_id: str = Header(None) # ADDED SESSION ID
 ):
+    if not session_id:
+        raise HTTPException(
+            status_code=400, 
+            detail="Session ID is missing in headers."
+        )
 
     if not MODEL_LOADED:
-
         raise HTTPException(
             status_code=500,
             detail="Sentiment model is not loaded."
         )
 
     try:
-
         content = await file.read()
-
-        df = pd.read_csv(
-            io.BytesIO(content)
-        )
+        df = pd.read_csv(io.BytesIO(content))
 
     except Exception as e:
-
         raise HTTPException(
             status_code=400,
             detail=f"Could not read CSV: {e}"
         )
 
     try:
-
-        raw_mapping = json.loads(
-            mapping_json
-        )
-
-        mapping = validate_mapping(
-            raw_mapping,
-            df
-        )
+        raw_mapping = json.loads(mapping_json)
+        mapping = validate_mapping(raw_mapping, df)
 
     except Exception as e:
-
         raise HTTPException(
             status_code=400,
             detail=str(e)
         )
 
     try:
-
         analytics = run_analysis(
             df=df,
             mapping=mapping,
@@ -306,7 +300,6 @@ async def analyze(
         )
 
     except Exception as e:
-
         raise HTTPException(
             status_code=500,
             detail=f"Analysis failed: {e}"
@@ -322,13 +315,21 @@ async def analyze(
         "analytics": analytics
     }
 
-    reports.append(report)
+    # ISOLATE REPORT SAVING BY SESSION ID
+    if session_id not in user_reports:
+        user_reports[session_id] = []
+        
+    user_reports[session_id].append(report)
 
     return report
 
 
 @app.get("/api/reports")
-async def get_reports():
+async def get_reports(session_id: str = Header(None)): # ADDED SESSION ID
+
+    # RETURN EMPTY LIST IF NO SESSION DATA EXISTS FOR THIS USER
+    if not session_id or session_id not in user_reports:
+        return []
 
     return [
         {
@@ -336,16 +337,24 @@ async def get_reports():
             "filename": report["filename"],
             "rows": report["rows"]
         }
-        for report in reports
+        for report in user_reports[session_id]
     ]
 
 
 @app.get("/api/reports/{report_id}")
 async def get_report(
-    report_id: str
+    report_id: str,
+    session_id: str = Header(None) # ADDED SESSION ID
 ):
+    
+    if not session_id or session_id not in user_reports:
+        raise HTTPException(
+            status_code=404,
+            detail="Report not found."
+        )
 
-    for report in reports:
+    # SEARCH ONLY IN THE USER'S OWN REPORTS
+    for report in user_reports[session_id]:
 
         if report["id"] == report_id:
             return report
@@ -1095,10 +1104,18 @@ def build_pdf_report(report):
 
 @app.get("/api/reports/{report_id}/pdf")
 async def download_report_pdf(
-    report_id: str
+    report_id: str,
+    session_id: str = Header(None) # ADDED SESSION ID
 ):
 
-    for report in reports:
+    if not session_id or session_id not in user_reports:
+        raise HTTPException(
+            status_code=404,
+            detail="Report not found."
+        )
+
+    # SEARCH ONLY IN THE USER'S OWN REPORTS
+    for report in user_reports[session_id]:
 
         if report["id"] == report_id:
 
