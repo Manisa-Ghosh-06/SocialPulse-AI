@@ -5,6 +5,9 @@
 SocialPulse AI is an AI-powered social media analytics platform that analyzes uploaded social media data and provides insights into **sentiment, demographics, trending topics, and influence/network connections**.
 
 ---
+## 📸 Project Preview
+
+![SocialPulse AI Dashboard](dashboard.png)
 
 ## 🚀 Features
 
